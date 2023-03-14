@@ -4,6 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const _ = require("lodash");
+require("dotenv").config();
 
 const app = express();
 
@@ -12,7 +13,20 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb+srv://abduqayum9504:Abdukayum1995@cluster0.flzpzxw.mongodb.net/todolistDB", {useNewUrlParser: true});
+// const MONGO_URI = "mongodb+srv://abduqayum9504:Abdukayum1995@cluster0.flzpzxw.mongodb.net/todolistDB"
+mongoose.set("strictQuery", false);
+const connectDB = async ()=> {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.log(error);
+    process.exit(1);
+  } finally {
+    console.log("Finally har doim ishlaydi");
+  }
+}
+// mongoose.connect("", {useNewUrlParser: true});
 
 // Mongoose Schema
 const itemsSchema = {
@@ -151,7 +165,13 @@ app.get("/about", function(req, res){
   res.render("about");
 });
 
-// let port = process.env.PORT;
+let PORT = process.env.PORT || 3000;
+
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Listening on port ${PORT}`);
+  })
+})
 // if (port == null || port == "") {
 //   port = 3000;
 // }
@@ -159,7 +179,3 @@ app.get("/about", function(req, res){
 // app.listen(port, function() {
 //   console.log("Server started successfully");
 // });
-
-app.listen(process.env.PORT || 3000, function () {
-console.log("Server started.");
- }); 
